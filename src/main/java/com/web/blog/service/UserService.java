@@ -24,6 +24,14 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public boolean loginUser(String username, String password) {
+        User user = userRepository.findByUsername(username);
+        if (user != null && crypt.matches(password, user.getPassword())) {
+            return true;
+        }
+        return false;
+    }
+
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }

@@ -18,7 +18,7 @@ import com.web.blog.model.RegisterRequest;
 
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/user")
 @CrossOrigin(origins = "*") // Frontend'in çalıştığı port
 public class UserController {
 
@@ -41,10 +41,6 @@ public class UserController {
         }
     }
 
-
-
-
-    
 
     @GetMapping("/deneme")
     String getMethodName() {

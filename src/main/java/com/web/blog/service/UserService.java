@@ -2,12 +2,17 @@ package com.web.blog.service;
 
 import com.web.blog.model.User;
 import com.web.blog.repository.UserRepository;
+
+import java.util.Date;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import org.springframework.stereotype.Service;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Service
 public class UserService {
@@ -18,7 +23,7 @@ public class UserService {
     private PasswordEncoder crypt;
 
     private String secretKey = "secret_key";
-    
+    private long expirationTime = 86400000; // Tokenin geçerli olma süresi (1 gün)
 
     public void registerUser(String username, String email, String password) {
         User user = new User();
@@ -29,12 +34,12 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public boolean loginUser(String username, String password) {
+    public String loginUser(String username, String password) {
         User user = userRepository.findByUsername(username);
         if (user != null && crypt.matches(password, user.getPassword())) {
-            return true;
+            return generateToken(user.getUsername()); // Başarıyla giriş yaptıysa token döndür
         }
-        return false;
+        return null; // Hatalı giriş
     }
 
     public User findByEmail(String email) {
@@ -43,19 +48,30 @@ public class UserService {
 
     public User getUserFromToken(String token) {
         try {
-            // Token'ı doğrula ve "claims" kısmını al
-            Claims claims = Jwts.parser()
-                    .setSigningKey(secretKey) // Gizli anahtar ile token'ı doğrula
-                    .parseClaimsJws(token.replace("Bearer ", "")) // "Bearer " kısmını temizle
-                    .getBody();
-
-            // Claims içerisinden kullanıcı adını al
-            String username = claims.getSubject();
-
-            // Veritabanından kullanıcıyı al
+            // Token içindeki son "-" karakterinin konumunu bul
+            int lastDashIndex = token.lastIndexOf("-");
+            
+            // Eğer "-" bulunamazsa ya da username kısmı yoksa null döndür
+            if (lastDashIndex == -1 || lastDashIndex == token.length() - 1) {
+                return null;
+            }
+            
+            // Username kısmını son "-" karakterinden itibaren al
+            String username = token.substring(lastDashIndex + 1);
+            
+            // Veritabanından kullanıcıyı bul ve döndür
             return userRepository.findByUsername(username);
+            
         } catch (Exception e) {
             return null; // Geçersiz token durumunda null döndür
         }
     }
+
+    public String generateToken(String username) {
+
+        String token = UUID.randomUUID().toString() + "-" + username;
+        return token;
+
+    }
+
 }

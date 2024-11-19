@@ -14,6 +14,12 @@ public class CartItem {
 
     private String productId;
 
+    private String title;
+
+    private String price;
+
+    private String imgSrc;
+
     @ManyToOne
     private User user; // Kullanıcı ile ilişkilendirmek için
 
@@ -32,6 +38,30 @@ public class CartItem {
 
     public void setProductId(String productId) {
         this.productId = productId;
+    }
+
+    public String getTitle(){
+        return title;
+    }
+
+    public void setTitle(String title){
+        this.title = title;
+    }
+
+    public String getPrice(){
+        return price;
+    }
+
+    public void setPrice(String price){
+        this.price = price;
+    }
+
+    public String getImgSrc(){
+        return imgSrc;
+    }
+
+    public void setImgSrc(String imgSrc){
+        this.imgSrc = imgSrc;
     }
 
     public User getUser() {
